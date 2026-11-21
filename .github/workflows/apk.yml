@@ -17,7 +17,7 @@ jobs:
         run: |
           npm install --ignore-scripts --prefix "$RUNNER_TEMP/studio-browser" puppeteer-core@24.27.0
           NODE_PATH="$RUNNER_TEMP/studio-browser/node_modules" node tools/editor-test.cjs
-      - run: bash gradlew --no-daemon :app:assembleDebug :app:lintDebug
+      - run: bash gradlew --no-daemon :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
       - name: Contrôler la signature et le point d’entrée LSPosed
         run: |
           apk=app/build/outputs/apk/debug/app-debug.apk

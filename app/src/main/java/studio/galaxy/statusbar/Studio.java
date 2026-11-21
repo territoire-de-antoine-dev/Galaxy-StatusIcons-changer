@@ -59,10 +59,10 @@ public final class Studio extends Activity {
         @JavascriptInterface public String publish(String text) {
             try {
                 if (!text.equals("{}") && !profile.matches) return "Firmware différent du profil analysé.";
-                new Pack(text,profile);
-                boolean saved = getSharedPreferences("active", MODE_WORLD_READABLE).edit().putString("icons",text).commit();
-                return saved ? "Enregistré pour le prochain chargement de SystemUI." : "Échec de l’écriture.";
-            } catch (SecurityException e) { return "Partage LSPosed indisponible. Le brouillon reste enregistré."; }
+                Pack pack = new Pack(text,profile);
+                PublishedPack.save(Studio.this, text);
+                return pack.icons.size() + " état(s) publié(s) pour le prochain chargement de SystemUI.";
+            }
             catch (Exception e) { return "Pack refusé — " + e.getMessage(); }
         }
         @JavascriptInterface public void backup(String json) {

@@ -9,7 +9,7 @@
 3. Importer une silhouette transparente en PNG, WebP ou SVG autonome. Le Studio la convertit en PNG de 128 pixels sur le grand côté. Prévoir une marge dans le dessin si nécessaire. Les SVG avec ressources externes et les animations ne sont pas pris en charge. Le cadre de destination reprend les dimensions intrinsèques du drawable Samsung.
 4. Examiner les deux aperçus. La variante nuit est facultative. Pour les drawables, sa sélection suit le mode nuit Android. Le fond d'une application peut changer la teinte demandée par SystemUI indépendamment de ce mode. La batterie utilise la luminosité de la teinte Samsung. Une silhouette alpha lisible sur les deux fonds donne un résultat plus prévisible.
 5. Cocher les états souhaités. **Exporter** permet de sauvegarder un pack JSON dans un emplacement choisi. **Importer un pack** crée un nouveau brouillon. Les packs restent éditables sans reconstruire l’APK.
-6. **Utiliser ce pack** publie une copie des états cochés dans les préférences partagées LSPosed. Elles contiennent les seules images activées et sont lisibles par d'autres processus. Limites de publication : 256 états, 2 Mio encodés. Les brouillons sont indépendants. Le prochain chargement de SystemUI applique la copie publiée.
+6. **Utiliser ce pack** publie une copie des états cochés dans un fichier privé. Un fournisseur Android donne accès en lecture au pack publié à SystemUI. Le module lit le fichier en arrière-plan au démarrage de SystemUI. Un état déjà affiché peut nécessiter un rafraîchissement de son icône. Limites de publication : 256 états, 2 Mio encodés. Les brouillons sont indépendants. Le prochain chargement de SystemUI applique la copie publiée.
 
 ## Premier essai sur le Galaxy — avec accord du propriétaire
 

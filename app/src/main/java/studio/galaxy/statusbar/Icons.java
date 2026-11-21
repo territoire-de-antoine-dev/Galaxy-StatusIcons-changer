@@ -17,21 +17,34 @@ public final class Icons implements IXposedHookZygoteInit, IXposedHookInitPackag
     private static String path;
     private static Pack pack;
     private static Profile profile;
-    private static boolean attempted;
+    private static final java.util.WeakHashMap<XResources, Boolean> resources = new java.util.WeakHashMap<>();
     public void initZygote(StartupParam param) { path = param.modulePath; }
 
-    private static synchronized Pack settings() {
-        if (attempted) return pack;
-        attempted = true;
+    private static void load(android.content.Context context, ClassLoader loader) {
         try (ZipFile zip = new ZipFile(path);
              InputStream input = zip.getInputStream(zip.getEntry("assets/profile.json"))) {
-            profile = new Profile(input);
-            if (profile.matches) {
-                XSharedPreferences prefs = new XSharedPreferences(Profile.PACKAGE, "active");
-                pack = new Pack(prefs.getString("icons", "{}"), profile);
+            Profile checked = new Profile(input);
+            if (!checked.matches) return;
+            try (InputStream stream = context.getContentResolver().openInputStream(PublishedPack.URI)) {
+                if (stream == null) throw new java.io.IOException("Fournisseur indisponible");
+                java.io.ByteArrayOutputStream data = new java.io.ByteArrayOutputStream();
+                byte[] block = new byte[8192];
+                int count;
+                while ((count = stream.read(block)) != -1) {
+                    if (data.size() + count > Pack.MAX_TEXT) throw new java.io.IOException("Pack trop grand");
+                    data.write(block,0,count);
+                }
+                Pack active = new Pack(data.toString("UTF-8"), checked);
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> activate(checked,active,loader));
             }
-        } catch (Exception e) { Log.w("GalaxyBarStudio", "Configuration ignorée", e); }
-        return pack;
+        } catch (Exception e) { Log.w("GalaxyBarStudio", "Lecture du pack publié impossible", e); }
+    }
+    private static synchronized void activate(Profile checked, Pack active, ClassLoader loader) {
+        profile = checked;
+        pack = active;
+        for (XResources res : new java.util.ArrayList<>(resources.keySet())) install(res);
+        if (pack.icons.keySet().stream().anyMatch(Profile::battery)) Battery.install(loader,pack);
+        Log.i("GalaxyBarStudio","États lus depuis le Studio " + active.icons.size());
     }
     static RectF fit(Bitmap image, Rect bounds) {
         float scale = Math.min((float) bounds.width()/image.getWidth(), (float) bounds.height()/image.getHeight());
@@ -40,19 +53,24 @@ public final class Icons implements IXposedHookZygoteInit, IXposedHookInitPackag
         return new RectF(x,y,x+w,y+h);
     }
     public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam p) {
-        if (!Profile.TARGET.equals(p.packageName) || settings() == null) return;
+        if (!Profile.TARGET.equals(p.packageName)) return;
+        synchronized (Icons.class) {
+            if (resources.put(p.res, Boolean.TRUE) == null && pack != null) install(p.res);
+        }
+    }
+    private static void install(XResources res) {
         int installed = 0;
         for (Map.Entry<String, Bitmap[]> item : pack.icons.entrySet()) {
             if (!profile.resources.has(item.getKey())) continue;
             try {
-                int id = p.res.getIdentifier(item.getKey(), "drawable", p.packageName);
+                int id = res.getIdentifier(item.getKey(), "drawable", Profile.TARGET);
                 if (id == 0) continue;
-                Drawable original = p.res.getDrawable(id, null);
-                float density = p.res.getDisplayMetrics().density;
+                Drawable original = res.getDrawable(id, null);
+                float density = res.getDisplayMetrics().density;
                 float width = original.getIntrinsicWidth()/density, height = original.getIntrinsicHeight()/density;
                 if (width <= 0 || height <= 0 || width > 96 || height > 96) continue;
                 final Bitmap[] images = item.getValue();
-                p.res.setReplacement(id, new XResources.DrawableLoader() {
+                res.setReplacement(id, new XResources.DrawableLoader() {
                     public Drawable newDrawable(XResources res, int ignored) {
                         boolean night = (res.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
                         Bitmap source = images[night ? 1 : 0];
@@ -70,12 +88,14 @@ public final class Icons implements IXposedHookZygoteInit, IXposedHookInitPackag
         Log.i("GalaxyBarStudio", "Ressources enregistrées " + installed);
     }
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam p) {
-        if (!Profile.TARGET.equals(p.packageName) || !Profile.TARGET.equals(p.processName) || settings() == null) return;
-        for (String key : pack.icons.keySet()) {
-            if (Profile.battery(key)) {
-                Battery.install(p.classLoader, pack);
-                break;
+        if (!Profile.TARGET.equals(p.packageName) || !Profile.TARGET.equals(p.processName)) return;
+        XposedHelpers.findAndHookMethod(android.app.Application.class, "attach", android.content.Context.class, new XC_MethodHook() {
+            @Override protected void afterHookedMethod(MethodHookParam param) {
+                android.content.Context ctx = (android.content.Context)param.args[0];
+                if (Profile.TARGET.equals(ctx.getPackageName())) {
+                    new Thread(() -> load(ctx,p.classLoader), "GalaxyStudio-pack").start();
+                }
             }
-        }
+        });
     }
 }
