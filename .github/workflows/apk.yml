@@ -13,6 +13,10 @@ jobs:
           java-version: '17'
       - uses: gradle/actions/wrapper-validation@v4
       - run: node --check app/src/main/assets/editor.js
+      - name: Tester l’éditeur et le pack Wi-Fi dans Chrome
+        run: |
+          npm install --ignore-scripts --prefix "$RUNNER_TEMP/studio-browser" puppeteer-core@24.27.0
+          NODE_PATH="$RUNNER_TEMP/studio-browser/node_modules" node tools/editor-test.cjs
       - run: bash gradlew --no-daemon :app:assembleDebug :app:lintDebug
       - name: Contrôler la signature et le point d’entrée LSPosed
         run: |
