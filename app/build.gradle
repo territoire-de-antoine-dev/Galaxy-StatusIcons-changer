@@ -3,6 +3,11 @@ android {
     namespace 'studio.galaxy.statusbar'
     compileSdk 34
     testOptions.unitTests.includeAndroidResources = true
+    testOptions.unitTests.all {
+        // Robolectric emulates ParcelFileDescriptor through the host JVM's file descriptor.
+        jvmArgs '--add-opens=java.base/java.io=ALL-UNNAMED'
+        testLogging.exceptionFormat = 'full'
+    }
     defaultConfig {
         applicationId 'studio.galaxy.statusbar'
         minSdk 31
