@@ -12,17 +12,24 @@ final class Pack {
     static final int MAX_TEXT = 2 * 1024 * 1024;
     final Map<String, Bitmap[]> icons = new HashMap<>();
 
+    final boolean pixelBattery, chargingWave, satellite;
     Pack(String text, Profile profile) throws Exception {
         if (text.length() > MAX_TEXT) throw new IllegalArgumentException("Pack supérieur à 2 Mio");
         JSONObject root = new JSONObject(text);
-        if (root.length() > 256) throw new IllegalArgumentException("Trop de ressources");
+        JSONObject features = root.optJSONObject("_features");
+        pixelBattery = features != null && features.optBoolean("pixelBattery");
+        chargingWave = features != null && features.optBoolean("chargingWave");
+        satellite = features != null && features.optBoolean("satellite");
+        root.remove("_features");
+        if (root.length() > 384) throw new IllegalArgumentException("Trop de ressources");
+        Map<String,Bitmap> decoded = new HashMap<>();
         Iterator<String> names = root.keys();
         while (names.hasNext()) {
             String key = names.next();
             if (!profile.allowed(key)) throw new IllegalArgumentException("Cible inconnue");
             JSONObject variants = root.getJSONObject(key);
-            Bitmap light = decode(variants.getString("day"));
-            Bitmap dark = variants.has("night") ? decode(variants.getString("night")) : light;
+            Bitmap light = decoded.computeIfAbsent(variants.getString("day"), Pack::decode);
+            Bitmap dark = variants.has("night") ? decoded.computeIfAbsent(variants.getString("night"), Pack::decode) : light;
             icons.put(key, new Bitmap[]{light, dark});
         }
     }

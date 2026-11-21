@@ -17,6 +17,7 @@ final class Battery {
             XposedBridge.hookMethod(drawable.getDeclaredMethod("draw", Canvas.class), new XC_MethodHook() {
                 private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
                 private boolean failed;
+                private final PixelBattery pixel = new PixelBattery();
                 protected void beforeHookedMethod(MethodHookParam p) {
                     if (failed) return;
                     try {
@@ -27,6 +28,12 @@ final class Battery {
                         int value = level.getInt(current);
                         if (value < 0 || value > 100 || self.getBounds().isEmpty()) return;
                         Bitmap[] images = pack.icons.get("battery_" + (charge.getBoolean(current) ? "charging_" : "normal_") + (value / 10 * 10));
+                        if (images == null && pack.pixelBattery) {
+                            boolean percent=(boolean)XposedHelpers.callMethod(self,"shouldShowPercentageIcon");
+                            pixel.draw((Canvas)p.args[0],self.getBounds(),value,charge.getBoolean(current),tint.getInt(self),percent);
+                            p.setResult(null);
+                            return;
+                        }
                         if (images == null) return;
                         int color = tint.getInt(self);
                         Bitmap image = images[Color.luminance(color) > 0.5f ? 1 : 0];

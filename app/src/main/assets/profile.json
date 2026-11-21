@@ -269,6 +269,22 @@
     "stat_sys_wifi_signal_wifi_calling_1": "0x7e081561",
     "stat_sys_wifi_signal_wifi_calling_2": "0x7e081562",
     "stat_sys_wifi_signal_wifi_calling_3": "0x7e081563",
-    "stat_sys_wifi_signal_wifi_calling_4": "0x7e081564"
+    "stat_sys_wifi_signal_wifi_calling_4": "0x7e081564",
+    "stat_sys_data_connected_5g_plus": "0x7e08145d",
+    "stat_sys_data_disabled_cross_1x_vzw": "0x7e081487",
+    "stat_sys_data_disabled_cross_3g_vzw": "0x7e081488",
+    "stat_sys_data_disabled_cross_4g_vzw": "0x7e081489",
+    "stat_sys_data_disabled_cross_5g_connected": "0x7e08148a",
+    "stat_sys_data_disabled_cross_5g_uwb_vzw": "0x7e08148b",
+    "stat_sys_data_disabled_cross_5g_vzw": "0x7e08148c",
+    "stat_sys_data_disabled_cross_e_vzw": "0x7e08148d",
+    "stat_sys_data_disabled_cross_g_vzw": "0x7e08148e",
+    "stat_sys_data_disabled_cross_h_plus_vzw": "0x7e08148f",
+    "stat_sys_data_disabled_cross_h_vzw": "0x7e081490",
+    "stat_sys_wifi_signal_pure_0": "0x7e08155b",
+    "stat_sys_wifi_signal_pure_1": "0x7e08155c",
+    "stat_sys_wifi_signal_pure_2": "0x7e08155d",
+    "stat_sys_wifi_signal_pure_3": "0x7e08155e",
+    "stat_sys_wifi_signal_pure_4": "0x7e08155f"
   }
 }

@@ -9,7 +9,7 @@ async function main() {
     const mime = {html:'text/html',js:'text/javascript',css:'text/css',json:'application/json'};
     const server = http.createServer((req,res) => {
         const name = req.url.slice(1) || 'index.html';
-        if (!['index.html','style.css','editor.js','profile.json'].includes(name)) {
+        if (!['index.html','style.css','editor.js','profile.json','pixel17.json'].includes(name)) {
             res.writeHead(404).end(); return;
         }
         res.writeHead(200,{'Content-Type':mime[name.split('.').pop()] + '; charset=utf-8'});
@@ -47,6 +47,15 @@ async function main() {
         await page.waitForFunction(() => document.querySelector('#packs').value === '2');
         await page.click('#apply'); await page.click('#off');
         assert.deepEqual(await page.evaluate(() => window.sent),{});
+        await page.click('#pixel');
+        await page.waitForFunction(() => document.querySelector('#satellite').checked);
+        await page.click('#apply');
+        const sent = await page.evaluate(() => window.sent);
+        assert.ok(sent.stat_sys_wifi5_signal_4 && sent.stat_sys_signal_0 && sent.stat_sys_signal_5level_5);
+        for (const badge of ['4g','4g_plus','lte','5g','5g_plus']) assert.ok(sent['stat_sys_data_connected_'+badge]);
+        assert.deepEqual(sent._features,{pixelBattery:true,chargingWave:true,satellite:true});
+        await page.click('#chargingWave'); await page.click('#apply');
+        assert.equal(await page.evaluate(() => window.sent._features.chargingWave),false);
         console.log('Essai Wi-Fi unique, conversion SVG en PNG, sélection, export/import, persistance et pack vide validés.');
     } finally { if (browser) await browser.close(); server.close(); }
 }

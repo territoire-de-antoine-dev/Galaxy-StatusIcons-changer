@@ -2,7 +2,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data: blob:; connect-src 'self'; object-src 'none'; frame-src 'none'">
 <title>Galaxy Status Bar Studio</title><link rel="stylesheet" href="style.css"></head><body><main>
 <h1>Galaxy Status Bar Studio</h1>
-<section><label for="packs">Mes packs</label><select id="packs"></select><div class="row"><button id="new">Créer un pack</button><button id="backup">Exporter</button><button id="restore">Importer un pack</button></div>
+<section><label for="packs">Mes packs</label><select id="packs"></select><div class="row"><button id="pixel">Charger le pack Pixel Android 17</button><button id="new">Créer un pack</button><button id="backup">Exporter</button><button id="restore">Importer un pack</button></div>
 <div id="naming" hidden><label for="name">Nom du nouveau pack</label><input id="name" maxlength="48"><button id="create">Créer</button></div></section>
 <section><h2>Aperçu</h2><div class="bar light"><b>09:41</b><span>●</span><div id="dayPreview"></div></div><div class="bar dark"><b>09:41</b><span>●</span><div id="nightPreview"></div></div>
 <small>Simulation sur deux fonds. SystemUI peut appliquer sa propre teinte.</small></section>
@@ -10,6 +10,11 @@
 <div class="row"><button id="day">Importer · jour</button><button id="night">Importer · nuit</button></div>
 <label class="check"><input type="checkbox" id="enabled"> Inclure cet état</label>
 <button id="sample">Préparer l’essai Wi-Fi à un seul état</button></section>
+<section><h2>Effets du pack</h2>
+<label class="check"><input type="checkbox" id="pixelBattery"> Batterie horizontale, verte en recharge</label>
+<label class="check"><input type="checkbox" id="chargingWave"> Vague au branchement USB ou secteur</label>
+<label class="check"><input type="checkbox" id="satellite"> Satellite pour urgences et absence de service</label>
+<small>Les points du satellite indiquent la réception mobile en mode appels d’urgence.</small></section>
 <section><h2>Application</h2><button id="apply" class="primary">Utiliser ce pack</button><button id="off">Désactiver les remplacements du Studio</button>
 <p>Le choix prend effet au prochain chargement de SystemUI. Les modifications du brouillon restent locales jusqu’à l’application.</p></section>
 <output id="status" role="status" aria-live="polite"></output>

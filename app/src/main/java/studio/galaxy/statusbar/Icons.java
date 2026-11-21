@@ -35,15 +35,17 @@ public final class Icons implements IXposedHookZygoteInit, IXposedHookInitPackag
                     data.write(block,0,count);
                 }
                 Pack active = new Pack(data.toString("UTF-8"), checked);
-                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> activate(checked,active,loader));
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> activate(checked,active,loader,context));
             }
         } catch (Exception e) { Log.w("GalaxyBarStudio", "Lecture du pack publié impossible", e); }
     }
-    private static synchronized void activate(Profile checked, Pack active, ClassLoader loader) {
+    private static synchronized void activate(Profile checked, Pack active, ClassLoader loader, android.content.Context context) {
         profile = checked;
         pack = active;
         for (XResources res : new java.util.ArrayList<>(resources.keySet())) install(res);
-        if (pack.icons.keySet().stream().anyMatch(Profile::battery)) Battery.install(loader,pack);
+        if (pack.pixelBattery || pack.icons.keySet().stream().anyMatch(Profile::battery)) Battery.install(loader,pack);
+        if (pack.satellite) MobileSatellite.install(loader);
+        if (pack.chargingWave) ChargingWave.install(context);
         Log.i("GalaxyBarStudio","États lus depuis le Studio " + active.icons.size());
     }
     static RectF fit(Bitmap image, Rect bounds) {

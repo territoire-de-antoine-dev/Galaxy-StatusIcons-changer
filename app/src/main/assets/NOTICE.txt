@@ -1,0 +1,7 @@
+Android 17 radio vectors. Copyright (C) 2025 The Android Open Source Project.
+Source: https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-17.0.0_r1/packages/SettingsLib/res/drawable/
+Google Material Design Icons. Copyright Google LLC.
+Source: https://github.com/google/material-design-icons/tree/master/src
+Both sets are used under the Apache License, Version 2.0 (Apache-2.0.txt).
+Modifications: extracted alpha silhouettes, rasterized and resized, adapted levels to Samsung resources.
+Carrier text variants, disabled indicators, battery drawing, charge wave and satellite rendering are independent Studio adaptations.

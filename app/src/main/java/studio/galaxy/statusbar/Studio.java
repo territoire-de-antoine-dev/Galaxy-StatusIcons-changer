@@ -32,7 +32,7 @@ public final class Studio extends Activity {
                 if (url.startsWith(ORIGIN)) {
                     String asset = url.substring(ORIGIN.length());
                     String mime = asset.equals("index.html") ? "text/html" : asset.equals("editor.js") ? "application/javascript" :
-                                  asset.equals("style.css") ? "text/css" : asset.equals("profile.json") ? "application/json" : null;
+                                  asset.equals("style.css") ? "text/css" : (asset.equals("profile.json") || asset.equals("pixel17.json")) ? "application/json" : null;
                     if (mime != null) try { return new WebResourceResponse(mime,"UTF-8",getAssets().open(asset)); }
                     catch (IOException ignored) { }
                 }

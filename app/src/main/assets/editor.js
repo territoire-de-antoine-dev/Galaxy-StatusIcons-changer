@@ -2,6 +2,7 @@
 const el = id => document.getElementById(id);
 const message = text => { el('status').textContent = text; };
 const storeKey = 'galaxy.studio.packs.v1';
+const effects = ['pixelBattery','chargingWave','satellite'];
 const testKey = 'stat_sys_wifi_signal_4';
 let catalog, library, variant, imageTarget, imagePack;
 const draft = () => library.packs[library.selected];
@@ -17,6 +18,7 @@ function edit(change) {
     render();
 }
 function render() {
+    for (const id of effects) el(id).checked = draft().features?.[id] === true;
     const entries = draft().icons;
     const current = entries[key()];
     el('packs').replaceChildren(...library.packs.map((p,i) => new Option(p.name,i)));
@@ -49,10 +51,10 @@ function options(preferred) {
     if (filtered.includes(preferred)) el('target').value = preferred;
     render();
 }
-function makePack(name, icons) {
+function makePack(name, icons, features={}) {
     edit(next => {
         next.selected = next.packs.length;
-        next.packs.push({name, icons});
+        next.packs.push({name, icons, features});
     });
 }
 async function raster(file) {
@@ -89,6 +91,15 @@ async function start() {
     listen('search','input',() => options(key()));
     listen('target','change',render);
     listen('packs','change',() => edit(n => { n.selected = Number(el('packs').value); }));
+    for (const id of effects) listen(id,'change',() => edit(n => {
+        const current = n.packs[n.selected];
+        current.features = {...current.features, [id]:el(id).checked};
+    }));
+    listen('pixel','click',async () => {
+        const pack = await (await fetch('pixel17.json')).json();
+        makePack(pack.name,pack.icons,pack.features);
+        message('Pack Pixel préparé. Utiliser ce pack pour le publier.');
+    });
     listen('new','click',() => { el('naming').hidden=false; el('name').focus(); });
     listen('create','click',() => {
         const name = el('name').value.trim();
@@ -122,6 +133,7 @@ async function start() {
         const active = {};
         for (const [k,v] of Object.entries(draft().icons)) if (v.enabled)
             active[k] = v.night ? {day:v.day,night:v.night} : {day:v.day};
+        if (effects.some(id => draft().features?.[id] === true)) active._features = draft().features;
         message(Studio.publish(JSON.stringify(active)));
     });
     listen('off','click',() => message(Studio.publish('{}')));
@@ -144,7 +156,7 @@ async function start() {
             }
             clean[name]=entry;
         }
-        makePack(item.name.slice(0,48),clean);
+        makePack(item.name.slice(0,48),clean,Object.fromEntries(effects.map(id => [id,item.features?.[id] === true])));
         message('Pack importé comme nouveau brouillon.');
     });
 }
